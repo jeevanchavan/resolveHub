@@ -40,6 +40,12 @@ jobs:
         defaults:
           run: 
             working-directory: backend
+
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRES_IN: 1h
+          NODE_ENV: test
         
         steps:
             - name: Checkout code
@@ -54,6 +60,9 @@ jobs:
 
             - name: Install dependencies
               run: npm ci
+
+            - name: Seed test database
+              run: npm run seed
 
             - name: Test
               run: npm test
