@@ -9,7 +9,7 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed": "node src/seed.js",
-    "test": "node tests/suite.test.mjs"
+    "test": "node tests/run-tests.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -25,6 +25,7 @@
     "@eslint/js": "^10.0.1",
     "eslint": "^10.11.0",
     "globals": "^17.12.0",
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "wait-on": "^9.5.1"
   }
 }
