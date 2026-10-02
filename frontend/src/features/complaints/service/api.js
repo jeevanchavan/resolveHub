@@ -7,6 +7,15 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// Attach Authorization Bearer token to all outgoing requests
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // =================== COMPLAINTS ===================
 
 export const createComplaint = async (data) => {

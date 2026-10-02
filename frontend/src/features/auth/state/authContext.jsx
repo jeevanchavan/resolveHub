@@ -1,24 +1,50 @@
-﻿import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { getMe } from "../service/api.js";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Initialize user immediately from localStorage to prevent flash/redirect on refresh
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
 
-  // Check existing session on mount (reads HttpOnly cookie via /api/auth/me)
+  const [loading, setLoading] = useState(() => {
+    // If we have a saved token, start with loading true while we verify in background
+    return !!localStorage.getItem('token');
+  });
+
+  // Verify and refresh session on mount
   useEffect(() => {
     const initAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await getMe();
         if (response && response.user) {
           setUser(response.user);
+          localStorage.setItem('user', JSON.stringify(response.user));
         } else {
           setUser(null);
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
         }
       } catch (error) {
-        setUser(null);
+        if (error.response?.status === 401) {
+          setUser(null);
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
+        }
       } finally {
         setLoading(false);
       }

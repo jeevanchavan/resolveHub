@@ -1,4 +1,4 @@
-﻿import { useContext } from "react";
+import { useContext } from "react";
 import { AuthContext } from "../state/authContext.jsx";
 import { login, register, logout, getMe } from "../service/api.js";
 
@@ -15,8 +15,14 @@ export const useAuth = () => {
     setLoading(true);
     try {
       const response = await login(email, password);
-      setUser(response.user);
-      return response.user;
+      if (response?.token) {
+        localStorage.setItem('token', response.token);
+      }
+      if (response?.user) {
+        localStorage.setItem('user', JSON.stringify(response.user));
+      }
+      setUser(response?.user || null);
+      return response?.user;
     } finally {
       setLoading(false);
     }
@@ -26,8 +32,14 @@ export const useAuth = () => {
     setLoading(true);
     try {
       const response = await register(name, email, password);
-      setUser(response.user);
-      return response.user;
+      if (response?.token) {
+        localStorage.setItem('token', response.token);
+      }
+      if (response?.user) {
+        localStorage.setItem('user', JSON.stringify(response.user));
+      }
+      setUser(response?.user || null);
+      return response?.user;
     } finally {
       setLoading(false);
     }
@@ -37,10 +49,17 @@ export const useAuth = () => {
     setLoading(true);
     try {
       const response = await getMe();
-      setUser(response.user);
-      return response.user;
+      if (response?.user) {
+        localStorage.setItem('user', JSON.stringify(response.user));
+        setUser(response.user);
+      }
+      return response?.user || null;
     } catch (error) {
-      setUser(null);
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+      }
       return null;
     } finally {
       setLoading(false);
@@ -50,9 +69,11 @@ export const useAuth = () => {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      await logout();
-      setUser(null);
+      await logout().catch(() => {});
     } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setUser(null);
       setLoading(false);
     }
   };
