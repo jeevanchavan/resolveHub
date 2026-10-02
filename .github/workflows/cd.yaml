@@ -1,37 +1,12 @@
-name: Deploy Backend to Azure App Service
+# Replaced by .github/workflows/main_resolve-backend.yml (Azure OIDC Deployment)
+# This file is retained as a manual placeholder.
+name: Unused CD Workflow
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'backend/**'
-      - '.github/workflows/cd.yaml'
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
-    name: Build & Deploy Backend
+  noop:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: backend
-        run: npm ci --omit=dev
-
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: resolve-backend
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: backend
+      - run: echo "Deployment is managed by main_resolve-backend.yml"
