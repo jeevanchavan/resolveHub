@@ -12,12 +12,14 @@ export const COOKIE_OPTIONS = {
 };
 
 export const registerUser = async (req, res) => {
-    const { username, email, password } = req.body;
+    const { name, username, email, password } = req.body;
+    const resolvedUsername = (username || name || email?.split('@')[0] || '').trim();
+    const resolvedName = (name || username || resolvedUsername).trim();
 
     const isAlreadyRegistered = await userModel.findOne({
         $or: [
             { email },
-            { username }
+            { username: resolvedUsername }
         ]
     });
 
@@ -30,8 +32,9 @@ export const registerUser = async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
 
     const user = await userModel.create({
+        name: resolvedName,
+        username: resolvedUsername,
         email,
-        username,
         password: hash
     });
 
@@ -48,8 +51,10 @@ export const registerUser = async (req, res) => {
         token,
         user: {
             id: user._id,
+            name: user.name,
             username: user.username,
-            email: user.email
+            email: user.email,
+            role: user.role
         }
     });
 };
