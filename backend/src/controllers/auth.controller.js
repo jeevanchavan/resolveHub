@@ -2,6 +2,15 @@ import userModel from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
+export const COOKIE_OPTIONS = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days
+};
+
 export const registerUser = async (req, res) => {
     const { username, email, password } = req.body;
 
@@ -32,10 +41,11 @@ export const registerUser = async (req, res) => {
         { expiresIn: '3d' }
     );
 
-    res.cookie("token", token);
+    res.cookie("token", token, COOKIE_OPTIONS);
 
     return res.status(201).json({
         message: "User registered successfully",
+        token,
         user: {
             id: user._id,
             username: user.username,
@@ -75,10 +85,11 @@ export const loginUser = async (req, res) => {
         { expiresIn: '3d' }
     );
 
-    res.cookie("token", token);
+    res.cookie("token", token, COOKIE_OPTIONS);
 
     return res.status(200).json({
         message: "user LoggedIn successfully",
+        token,
         user: {
             id: user._id,
             email: user.email,
@@ -114,7 +125,7 @@ export const logoutUser = async (req, res) => {
     }
 
     try {
-        res.clearCookie("token");
+        res.clearCookie("token", COOKIE_OPTIONS);
 
         res.status(200).json({
             message: "user logged out successfully"
